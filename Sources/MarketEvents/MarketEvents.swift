@@ -103,7 +103,7 @@ struct MarketEvents {
 // common "locale" values
 extension MarketEvents {
     static let newYorkTimeZone: TimeZone = .init(identifier: "America/New_York")!
-    static let posixLocale: Locale = .init(identifier: "en_POSIX")
+    static let posixLocale: Locale = .init(identifier: "en_US_POSIX")
     
     static let newYorkPosixCalendar: Calendar = {
         var calendar = posixLocale.calendar
