@@ -1,3 +1,4 @@
+import Foundation
 import DiscordBM
 
 struct DiscordEventHandler: GatewayEventHandler {
@@ -43,9 +44,44 @@ struct DiscordEventHandler: GatewayEventHandler {
             let symbolOption = try subcommand.requireOption(named: "symbol")
             let symbol = try symbolOption.requireString()
             
+            let upperSymbol: String = symbol.uppercased()
+            
+            guard let earnings = try await finnhubClient.nextEarnings(for: upperSymbol) else {
+                try await updateReply(.init(content: "No upcoming earnings found for \(upperSymbol)"))
+                return
+            }
+            
+            let userFacingDateStyle = Date.FormatStyle(
+                date: .long, time: .omitted, locale: MarketEvents.posixLocale,
+                calendar: MarketEvents.newYorkPosixCalendar, timeZone: MarketEvents.newYorkTimeZone,
+                capitalizationContext: .middleOfSentence
+            )
+            
+            var message = "\(earnings.symbol) reports earnings on "
+            message += userFacingDateStyle.format(earnings.date)
+            
+            let checkedHour: Finnhub.CheckedMarketHour?
+            if let uncheckedHour = earnings.hour {
+                checkedHour = Finnhub.CheckedMarketHour(rawValue: uncheckedHour.rawValue)
+            } else {
+                checkedHour = nil
+            }
+            
+            switch checkedHour {
+            case .beforeMarketOpen:
+                message += " before market open"
+            case .afterMarketClose:
+                message += " after market close"
+            case .duringMarketHours:
+                message += " during market hours"
+            case nil:
+                break // unknown
+            }
+            
             // TODO: set reminder
             // TODO: message wording
-            try await updateReply(.init(content: "reminder for \(symbol)"))
+            
+            try await updateReply(.init(content: message))
         default:
             throw Error.unknownCommand
         }

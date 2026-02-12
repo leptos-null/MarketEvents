@@ -130,6 +130,15 @@ extension Finnhub {
     }
 }
 
+extension Finnhub {
+    // closed-set version of `Finnhub.Earnings.Event.Hour`
+    enum CheckedMarketHour: String, Codable {
+        case beforeMarketOpen = "bmo"
+        case afterMarketClose = "amc"
+        case duringMarketHours = "dmh"
+    }
+}
+
 extension Finnhub.Earnings.Event.Hour {
     static let beforeMarketOpen: Self = .init(rawValue: "bmo")
     static let afterMarketClose: Self = .init(rawValue: "amc")
