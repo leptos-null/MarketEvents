@@ -1,0 +1,33 @@
+name: Deploy
+
+on: workflow_dispatch
+
+# Allow only one
+concurrency:
+  group: "deploy"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: bot-prod
+    runs-on: ubuntu-24.04-arm
+    # max is 35 days, per
+    # https://docs.github.com/en/actions/reference/limits
+    timeout-minutes: 50000
+    steps:
+      - name: Checkout
+        timeout-minutes: 2 # it's a small repo - anything longer is odd
+        uses: actions/checkout@v6
+
+      - name: Build
+        timeout-minutes: 15 # it should be under 5 minutes - triple to be safe
+        run: swift build -c release
+
+      - name: Run
+        timeout-minutes: 50000
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          MONGO_DB_URI: ${{ secrets.MONGO_DB_URI }}
+        run: ./.build/release/MarketEvents
