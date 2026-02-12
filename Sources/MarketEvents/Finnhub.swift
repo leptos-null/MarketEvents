@@ -69,15 +69,18 @@ extension Finnhub.Client {
     func nextEarnings(for symbol: String, after date: Date = .now) async throws -> Finnhub.Earnings.Event? {
         let calendar = MarketEvents.newYorkPosixCalendar
         
+        // take the floor of `date` to allow setting reminders on the day of `date`
+        let startOfDay = calendar.startOfDay(for: date)
+        
         // 1 quarter
-        guard let futureDate = calendar.date(byAdding: .month, value: 3, to: date) else {
+        guard let futureDate = calendar.date(byAdding: .month, value: 3, to: startOfDay) else {
             throw Calendar.ArithmeticError()
         }
-        let response = try await self.earningsFor(symbol: symbol, fromDate: date, toDate: futureDate)
+        let response = try await self.earningsFor(symbol: symbol, fromDate: startOfDay, toDate: futureDate)
         
         let sorted = response.earningsCalendar
             .filter { event in
-                event.date >= date
+                event.date >= startOfDay
             }
             .sorted(using: KeyPathComparator(\.date))
         
