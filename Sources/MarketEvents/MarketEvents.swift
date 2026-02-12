@@ -43,7 +43,7 @@ struct MarketEvents {
         let discordBot = await BotGatewayManager(token: discordBotToken, intents: [
         ])
         
-        let finnhubClient = Finnhub.Client(apiKey: finnhubApiKey, httpClient: .init())
+        let finnhubClient = Finnhub.Client(apiKey: finnhubApiKey)
         
         let database = try await MongoDatabase.connect(to: mongoDbUri)
         let reminderStore = ReminderStore(database: database)

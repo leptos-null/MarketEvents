@@ -12,7 +12,7 @@ extension Finnhub {
         
         private let baseURL: String = "https://finnhub.io/api/v1"
         
-        init(apiKey: String, httpClient: HTTPClient) {
+        init(apiKey: String, httpClient: HTTPClient = .shared) {
             self.apiKey = apiKey
             self.httpClient = httpClient
         }
