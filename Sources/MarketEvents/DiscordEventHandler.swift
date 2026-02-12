@@ -4,6 +4,8 @@ struct DiscordEventHandler: GatewayEventHandler {
     let client: any DiscordClient
     let event: Gateway.Event
     
+    let finnhubClient: Finnhub.Client
+    
     func onInteractionCreate(_ interaction: Interaction) async throws {
         let reply: (Payloads.InteractionResponse) async throws -> Void = { response in
             try await client

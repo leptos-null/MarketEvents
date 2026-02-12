@@ -36,9 +36,12 @@ struct MarketEvents {
     
     static func main() async throws {
         let discordBotToken = requiredEnvironmentValue(for: "DISCORD_BOT_TOKEN")
+        let finnhubApiKey = requiredEnvironmentValue(for: "FINNHUB_API_KEY")
         
         let discordBot = await BotGatewayManager(token: discordBotToken, intents: [
         ])
+        
+        let finnhubClient = Finnhub.Client(apiKey: finnhubApiKey, httpClient: .init())
         
         await withTaskGroup(of: Void.self) { taskGroup in
             taskGroup.addTask {
@@ -67,10 +70,31 @@ struct MarketEvents {
             // we don't expect this loop to terminate (i.e. we expect it to run forever)
             for await event in await discordBot.events {
                 taskGroup.addTask {
-                    let handler = DiscordEventHandler(client: discordBot.client, event: event)
+                    let handler = DiscordEventHandler(
+                        client: discordBot.client,
+                        event: event,
+                        finnhubClient: finnhubClient
+                    )
                     await handler.handleAsync()
                 }
             }
         }
+    }
+}
+
+// common "locale" values
+extension MarketEvents {
+    static let newYorkTimeZone: TimeZone = .init(identifier: "America/New_York")!
+    static let posixLocale: Locale = .init(identifier: "en_POSIX")
+    
+    static let newYorkPosixCalendar: Calendar = {
+        var calendar = posixLocale.calendar
+        calendar.timeZone = newYorkTimeZone
+        return calendar
+    }()
+}
+
+extension Calendar {
+    struct ArithmeticError: Swift.Error {
     }
 }
