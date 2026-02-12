@@ -67,7 +67,7 @@ struct MarketEvents {
             // we don't expect this loop to terminate (i.e. we expect it to run forever)
             for await event in await discordBot.events {
                 taskGroup.addTask {
-                    let handler = DiscordEventHandler(event: event)
+                    let handler = DiscordEventHandler(client: discordBot.client, event: event)
                     await handler.handleAsync()
                 }
             }
