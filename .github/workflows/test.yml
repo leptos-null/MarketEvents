@@ -1,0 +1,26 @@
+name: Deploy
+
+on: # workflow_dispatch
+  push:
+    branches: # for testing
+      - 'workflow/testing'
+
+# Allow one concurrent
+concurrency:
+  group: "deploy"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build
+        env:
+          SAMPLE_VAR: sample_value
+        run: |
+          echo "SAMPLE_VAR: ${SAMPLE_VAR}"
+          swift build -c release
+          ls -alh .build/
+          ls -alh .build/*/release
