@@ -1,5 +1,5 @@
 {
-  "originHash" : "10820ad67b8acd69148aed7b5b133a2b9b386ebcafbee746eb95a7a4b4c2a488",
+  "originHash" : "b598370ef98468a7ad22ed2ca5037ea48c6b55185a76f91141456056706bffc6",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "4b99975677236d13f0754339864e5360142ff5a1",
         "version" : "1.30.3"
+      }
+    },
+    {
+      "identity" : "bson",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/orlandos-nl/BSON.git",
+      "state" : {
+        "revision" : "4240cf68b5d161434034a493741f0ae08cbef017",
+        "version" : "8.2.0"
       }
     },
     {
@@ -26,6 +35,24 @@
       "state" : {
         "revision" : "c5e9b0b75370a5b28bf5fe0627761c71357ae880",
         "version" : "1.15.0"
+      }
+    },
+    {
+      "identity" : "dnsclient",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/orlandos-nl/DNSClient.git",
+      "state" : {
+        "revision" : "ae146fd47b64df4222fdb455d520763be9b98b58",
+        "version" : "2.6.1"
+      }
+    },
+    {
+      "identity" : "mongokitten",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/orlandos-nl/MongoKitten.git",
+      "state" : {
+        "revision" : "cab8d2a80cd64c3861f81306d098c29cb3c0d6d7",
+        "version" : "7.11.0"
       }
     },
     {
@@ -134,6 +161,15 @@
       "state" : {
         "revision" : "2778fd4e5a12a8aaa30a3ee8285f4ce54c5f3181",
         "version" : "1.9.1"
+      }
+    },
+    {
+      "identity" : "swift-metrics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-metrics.git",
+      "state" : {
+        "revision" : "0743a9364382629da3bf5677b46a2c4b1ce5d2a6",
+        "version" : "2.7.1"
       }
     },
     {

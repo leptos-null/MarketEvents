@@ -13,12 +13,14 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/DiscordBM/DiscordBM", from: "1.0.0"),
+        .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.9.0"),
     ],
     targets: [
         .executableTarget(
             name: "MarketEvents",
             dependencies: [
                 .product(name: "DiscordBM", package: "DiscordBM"),
+                .product(name: "MongoKitten", package: "MongoKitten"),
             ]
         ),
     ]

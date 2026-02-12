@@ -6,6 +6,7 @@ struct DiscordEventHandler: GatewayEventHandler {
     let event: Gateway.Event
     
     let finnhubClient: Finnhub.Client
+    let reminderStore: ReminderStore
     
     func onInteractionCreate(_ interaction: Interaction) async throws {
         let reply: (Payloads.InteractionResponse) async throws -> Void = { response in
@@ -67,6 +68,13 @@ struct DiscordEventHandler: GatewayEventHandler {
                 checkedHour = nil
             }
             
+            guard let checkedHour else {
+                try await updateReply(.init(content: message, embeds: [
+                    .init(description: "Report hour not found. Please check again closer to the date.", color: .yellow)
+                ]))
+                return
+            }
+            
             switch checkedHour {
             case .beforeMarketOpen:
                 message += " before market open"
@@ -74,12 +82,25 @@ struct DiscordEventHandler: GatewayEventHandler {
                 message += " after market close"
             case .duringMarketHours:
                 message += " during market hours"
-            case nil:
-                break // unknown
             }
             
-            // TODO: set reminder
-            // TODO: message wording
+            guard let channelId = interaction.channel_id else {
+                try await updateReply(.init(content: message, embeds: [
+                    .init(description: "Requested channel not found - unable to create reminder.", color: .red)
+                ]))
+                return
+            }
+            
+            let reminder = ReminderStore.Element(
+                channelId: channelId,
+                symbol: upperSymbol,
+                earningsDate: earnings.date, earningsHour: checkedHour
+            )
+            
+            try await reminderStore.add(reminder)
+            
+            message += ".\n"
+            message += "I'll remind you before the report"
             
             try await updateReply(.init(content: message))
         default:

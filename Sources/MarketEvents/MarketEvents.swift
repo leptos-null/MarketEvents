@@ -1,5 +1,6 @@
 import Foundation
 import DiscordBM
+import MongoKitten
 import Logging
 
 @main
@@ -37,11 +38,15 @@ struct MarketEvents {
     static func main() async throws {
         let discordBotToken = requiredEnvironmentValue(for: "DISCORD_BOT_TOKEN")
         let finnhubApiKey = requiredEnvironmentValue(for: "FINNHUB_API_KEY")
+        let mongoDbUri = requiredEnvironmentValue(for: "MONGO_DB_URI")
         
         let discordBot = await BotGatewayManager(token: discordBotToken, intents: [
         ])
         
         let finnhubClient = Finnhub.Client(apiKey: finnhubApiKey, httpClient: .init())
+        
+        let database = try await MongoDatabase.connect(to: mongoDbUri)
+        let reminderStore = ReminderStore(database: database)
         
         await withTaskGroup(of: Void.self) { taskGroup in
             taskGroup.addTask {
@@ -73,7 +78,8 @@ struct MarketEvents {
                     let handler = DiscordEventHandler(
                         client: discordBot.client,
                         event: event,
-                        finnhubClient: finnhubClient
+                        finnhubClient: finnhubClient,
+                        reminderStore: reminderStore
                     )
                     await handler.handleAsync()
                 }
