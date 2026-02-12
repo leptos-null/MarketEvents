@@ -139,6 +139,24 @@ extension Finnhub {
     }
 }
 
+extension Finnhub.CheckedMarketHour: Comparable {
+    static func < (lhs: Self, rhs: Self) -> Bool {
+        switch (lhs, rhs) {
+        case (.beforeMarketOpen, .beforeMarketOpen): false
+        case (.beforeMarketOpen, .afterMarketClose): true
+        case (.beforeMarketOpen, .duringMarketHours): true
+            
+        case (.afterMarketClose, .beforeMarketOpen): false
+        case (.afterMarketClose, .afterMarketClose): false
+        case (.afterMarketClose, .duringMarketHours): false
+            
+        case (.duringMarketHours, .beforeMarketOpen): false
+        case (.duringMarketHours, .afterMarketClose): true
+        case (.duringMarketHours, .duringMarketHours): false
+        }
+    }
+}
+
 extension Finnhub.Earnings.Event.Hour {
     static let beforeMarketOpen: Self = .init(rawValue: "bmo")
     static let afterMarketClose: Self = .init(rawValue: "amc")

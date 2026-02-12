@@ -48,7 +48,19 @@ struct MarketEvents {
         let database = try await MongoDatabase.connect(to: mongoDbUri)
         let reminderStore = ReminderStore(database: database)
         
+        let reminderScheduler = ReminderScheduler(reminderStore: reminderStore, discordClient: discordBot.client)
+        
         await withTaskGroup(of: Void.self) { taskGroup in
+            taskGroup.addTask {
+                do {
+                    try await reminderScheduler.start()
+                } catch {
+                    logger.error("reminderScheduler.start()", metadata: [
+                        "error": "\(error)"
+                    ])
+                }
+            }
+            
             taskGroup.addTask {
                 await discordBot.connect()
                 
