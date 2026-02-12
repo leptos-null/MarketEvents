@@ -12,15 +12,17 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    environment:
+      name: bot-prod
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Build
         env:
-          SAMPLE_VAR: sample_value
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          MONGO_DB_URI: ${{ secrets.MONGO_DB_URI }}
         run: |
-          echo "SAMPLE_VAR: ${SAMPLE_VAR}"
           swift build -c release
-          ls -alh .build/
-          ls -alh .build/*/release
+          ./.build/release/MarketEvents
