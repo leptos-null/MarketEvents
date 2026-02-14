@@ -38,7 +38,7 @@ actor ReminderStore {
 }
 
 extension ReminderStore {
-    // if we were using an associative database, I would probably split this up into 2 tables:
+    // if we were using a relational database, I would probably split this up into 2 tables:
     // - earnings
     //   - symbol
     //   - date
@@ -48,7 +48,7 @@ extension ReminderStore {
     //   - symbol
     //   - created_at
     //
-    // since MongoDB Atlas is not associative, I think maintaining 2 tables is
+    // since MongoDB Atlas is not relational, I think maintaining 2 tables is
     // more error-prone, and therefore we're using a single collection here.
     nonisolated struct Element: Codable, Identifiable {
         let id: String
