@@ -22,3 +22,20 @@ Later, the bot sends a reminder:
 > RIVN
 
 The reminder is formatted this way so that multiple symbols may be listed in the reminder.
+
+### Services
+
+Running this project requires tokens/ secrets for accessing 3 services:
+
+1. Discord
+    1. Environment variable in this repo: `DISCORD_BOT_TOKEN`
+    2. Documentation: https://docs.discord.com/developers/quick-start/getting-started
+    3. Usage: Sending messages in Discord, adding slash commands, etc.
+2. Finnhub
+    1. Environment variable in this repo: `FINNHUB_API_KEY`
+    2. Documentation: https://finnhub.io/docs/api/introduction
+    3. Usage: Getting the upcoming earnings date for a given ticker symbol
+3. MongoDB Atlas
+    1. Environment variable in this repo: `MONGO_DB_URI`
+    2. Documentation: https://www.mongodb.com/products/platform
+    3. Usage: Storing reminders persistently (across runs). I thought about using a local database, however I thought using a remote service for storage would be more convenient for when I switch the bot between hosting providers (the bot itself, not the storage provider).
