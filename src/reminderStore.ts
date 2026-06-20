@@ -58,11 +58,33 @@ export class ReminderStore {
 	}
 
 	// Upsert (vs. the Swift `insertEncoded`, which threw on a duplicate `_id`):
-	// re-adding the same symbol/channel now refreshes the earnings date.
+	// re-adding the same symbol/channel refreshes the earnings event. `sent_keys`
+	// is preserved when the earnings date is unchanged — so an instance that has
+	// already been dispatched isn't re-sent on a re-run — and reset only when the
+	// date moves to a new event. `created_at` is written once, on insert.
 	async add(element: ReminderElement): Promise<void> {
 		const collection = await this.collection();
-		const { _id, ...rest } = element;
-		await collection.replaceOne({ _id }, rest, { upsert: true });
+		const { _id, created_at, sent_keys: _ignored, ...rest } = element;
+		// Wrap assigned fields in `$literal` so a value beginning with `$` is stored
+		// verbatim rather than interpreted as an aggregation field path.
+		const fields = Object.fromEntries(Object.entries(rest).map(([key, value]) => [key, { $literal: value }]));
+		// `$earnings_date` / `$sent_keys` reference the existing document (pre-update);
+		// on insert they're missing, so `sent_keys` falls through to `[]`.
+		await collection.updateOne(
+			{ _id },
+			[
+				{
+					$set: {
+						...fields,
+						created_at: { $ifNull: ['$created_at', created_at] },
+						sent_keys: {
+							$cond: [{ $eq: ['$earnings_date', rest.earnings_date] }, { $ifNull: ['$sent_keys', []] }, []],
+						},
+					},
+				},
+			],
+			{ upsert: true },
+		);
 	}
 
 	async prune(now: Date = new Date()): Promise<void> {
