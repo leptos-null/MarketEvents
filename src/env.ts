@@ -7,6 +7,4 @@ export interface Env {
 	// vars (set in wrangler.jsonc)
 	DISCORD_PUBLIC_KEY: string;
 	DISCORD_APPLICATION_ID: string;
-	// optional: when set, slash commands register to this guild only (fast iteration)
-	DISCORD_DEV_GUILD_ID?: string;
 }

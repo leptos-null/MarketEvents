@@ -23,8 +23,7 @@
 	],
 	"vars": {
 		"DISCORD_APPLICATION_ID": "",
-		"DISCORD_PUBLIC_KEY": "",
-		"DISCORD_DEV_GUILD_ID": ""
+		"DISCORD_PUBLIC_KEY": ""
 	}
 	/**
 	 * Smart Placement
