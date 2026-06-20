@@ -1,0 +1,15 @@
+# Copy to `.dev.vars` and fill in. Used by `wrangler dev` and `bun run register`.
+# In production these are set via `wrangler secret put` (secrets) and
+# wrangler.jsonc `vars` (non-secret values).
+
+# Secrets
+DISCORD_BOT_TOKEN=
+FINNHUB_API_KEY=
+MONGO_DB_URI=
+
+# Discord application config (non-secret; also mirrored in wrangler.jsonc vars)
+DISCORD_PUBLIC_KEY=
+DISCORD_APPLICATION_ID=
+
+# Optional: register slash commands to a single guild for fast iteration
+DISCORD_DEV_GUILD_ID=

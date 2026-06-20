@@ -1,40 +1,57 @@
 /**
- * Welcome to Cloudflare Workers!
+ * Market Events — a Discord bot that reminds a channel about upcoming earnings.
  *
- * This is a template for a Scheduled Worker: a Worker that can run on a
- * configurable interval:
- * https://developers.cloudflare.com/workers/platform/triggers/cron-triggers/
+ * On Cloudflare Workers the bot is split across two handlers:
+ *  - `fetch`: receives Discord HTTP interactions (verifies the Ed25519 signature,
+ *    answers PINGs, dispatches slash commands).
+ *  - `scheduled`: cron trigger that prunes old reminders and sends any that are due.
  *
- * - Run `bun run dev` in your terminal to start a development server
- * - Run `curl "http://localhost:8787/__scheduled?cron=*+*+*+*+*"` to see your Worker in action
- * - Run `bun run deploy` to publish your Worker
- *
- * Bind resources to your Worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `bun run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
+ * Secrets/vars are documented in README.md and `.dev.vars.example`.
+ *  - Run `bun run dev` to start a local development server
+ *  - Run `bun run register` to publish the slash commands
+ *  - Run `bun run deploy` to publish the Worker
  */
+import { InteractionResponseType, InteractionType, verifyKey } from 'discord-interactions';
+import type { Interaction } from './discord';
+import type { Env } from './env';
+import { handleInteraction } from './interactions';
+import { runScheduled } from './reminderScheduler';
 
 export default {
-	async fetch(req) {
-		const url = new URL(req.url);
-		url.pathname = '/__scheduled';
-		url.searchParams.append('cron', '* * * * *');
-		return new Response(`To test the scheduled handler, ensure you have used the "--test-scheduled" then try running "curl ${url.href}".`);
+	async fetch(req, env, ctx): Promise<Response> {
+		if (req.method !== 'POST') {
+			return new Response('Method not allowed', { status: 405 });
+		}
+
+		const signature = req.headers.get('X-Signature-Ed25519');
+		const timestamp = req.headers.get('X-Signature-Timestamp');
+		const body = await req.text();
+
+		if (!signature || !timestamp) {
+			return new Response('Missing signature headers', { status: 401 });
+		}
+
+		const isValid = await verifyKey(body, signature, timestamp, env.DISCORD_PUBLIC_KEY);
+		if (!isValid) {
+			return new Response('Invalid request signature', { status: 401 });
+		}
+
+		const interaction = JSON.parse(body) as Interaction;
+
+		if (interaction.type === InteractionType.PING) {
+			return Response.json({ type: InteractionResponseType.PONG });
+		}
+
+		if (interaction.type === InteractionType.APPLICATION_COMMAND) {
+			return handleInteraction(interaction, env, ctx);
+		}
+
+		return new Response('Unsupported interaction type', { status: 400 });
 	},
 
-	// The scheduled handler is invoked at the interval set in our wrangler.jsonc's
-	// [[triggers]] configuration.
-	async scheduled(event, env, ctx): Promise<void> {
-		// A Cron Trigger can make requests to other endpoints on the Internet,
-		// publish to a Queue, query a D1 Database, and much more.
-		//
-		// We'll keep it simple and make an API call to a Cloudflare API:
-		let resp = await fetch('https://api.cloudflare.com/client/v4/ips');
-		let wasSuccessful = resp.ok ? 'success' : 'fail';
-
-		// You could store this result in KV, write to a D1 Database, or publish to a Queue.
-		// In this template, we'll just log the result:
-		console.log(`trigger fired at ${event.cron}: ${wasSuccessful}`);
+	async scheduled(_event, env): Promise<void> {
+		// awaited (not `waitUntil`) so the runtime keeps the invocation alive until
+		// prune + send complete, and any error propagates to the logs.
+		await runScheduled(env);
 	},
 } satisfies ExportedHandler<Env>;

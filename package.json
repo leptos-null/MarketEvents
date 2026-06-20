@@ -6,11 +6,18 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --test-scheduled",
     "start": "wrangler dev --test-scheduled",
+    "register": "bun --env-file=.dev.vars src/register.ts",
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {
+    "@types/luxon": "^3.7.2",
     "@types/node": "^26.0.0",
     "typescript": "^5.5.2",
     "wrangler": "^4.103.0"
+  },
+  "dependencies": {
+    "discord-interactions": "^4.4.0",
+    "luxon": "^3.7.2",
+    "mongodb": "^7.3.0"
   }
 }

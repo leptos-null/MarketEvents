@@ -11,14 +11,21 @@
 		"enabled": true
 	},
 	"triggers": {
+		// Wake at 9am/1pm/3pm New York time. Cron is UTC, so cover both EST (UTC-5)
+		// and EDT (UTC-4); sent_keys dedup makes the redundant hour harmless.
 		"crons": [
-			"* * * * *"
+			"0 13,14,17,18,19,20 * * *"
 		]
 	},
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
-	]
+	],
+	"vars": {
+		"DISCORD_APPLICATION_ID": "",
+		"DISCORD_PUBLIC_KEY": "",
+		"DISCORD_DEV_GUILD_ID": ""
+	}
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
