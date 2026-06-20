@@ -118,7 +118,11 @@ async function handleEarnings(interaction: Interaction, data: InteractionData, e
 		};
 
 		const reminderStore = new ReminderStore(env.MONGO_DB_URI);
-		await reminderStore.add(reminder);
+		try {
+			await reminderStore.add(reminder);
+		} finally {
+			await reminderStore.close();
+		}
 
 		message += '.\n';
 		message += "I'll remind you before the report";

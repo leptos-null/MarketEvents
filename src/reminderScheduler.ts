@@ -30,8 +30,12 @@ interface StapledReminder {
 
 export async function runScheduled(env: Env): Promise<void> {
 	const reminderStore = new ReminderStore(env.MONGO_DB_URI);
-	await reminderStore.prune();
-	await sendIfNeeded(reminderStore, env, new Date());
+	try {
+		await reminderStore.prune();
+		await sendIfNeeded(reminderStore, env, new Date());
+	} finally {
+		await reminderStore.close();
+	}
 }
 
 function reminderInstances(reminder: ReminderElement): ReminderInstance[] {

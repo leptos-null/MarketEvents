@@ -35,26 +35,33 @@ export function reminderId(symbol: string, channelId: string): string {
 	return `${symbol}_${channelId}`;
 }
 
-// A single MongoClient is reused across requests/invocations. The driver runs on
-// Workers with `nodejs_compat`; `maxPoolSize: 1` suits the serverless model.
-let cachedClient: MongoClient | undefined;
-
 export class ReminderStore {
+	// One client per instance (i.e. per invocation), opened lazily and closed via
+	// `close()`. A Worker cannot reuse a socket created in a previous request's I/O
+	// context, so caching the client across invocations hangs the next one.
+	private client: MongoClient | undefined;
+
 	constructor(private readonly uri: string) {}
 
-	// Lazily import the driver and create the (cached) client so `bson`'s module
-	// initializer runs inside a handler rather than in global scope.
+	// Lazily import the driver so `bson`'s module initializer runs inside a handler
+	// rather than in global scope (Workers disallow RNG there).
 	private async collection(): Promise<Collection<ReminderElement>> {
-		if (!cachedClient) {
+		if (!this.client) {
 			const { MongoClient } = await import('mongodb');
-			cachedClient = new MongoClient(this.uri, {
+			this.client = new MongoClient(this.uri, {
 				maxPoolSize: 1,
 				minPoolSize: 0,
 				serverSelectionTimeoutMS: 5000,
 			});
 		}
 		// `db()` with no name uses the database from the connection string
-		return cachedClient.db().collection<ReminderElement>('reminders');
+		return this.client.db().collection<ReminderElement>('reminders');
+	}
+
+	// Call once the invocation is done with the store. Safe if never opened.
+	async close(): Promise<void> {
+		await this.client?.close();
+		this.client = undefined;
 	}
 
 	// Upsert (vs. the Swift `insertEncoded`, which threw on a duplicate `_id`):
