@@ -158,25 +158,21 @@ async function sendMessage(
 		embeds: [{ title: 'Earnings Reminders', description: sectionContents.join('\n') }],
 	});
 
-	// record which instance keys we just sent, per reminder
-	const sentKeysByReminder = new Map<string, { channelId: string; symbol: string; keys: Set<string> }>();
+	// record which instance keys we just sent, per symbol. `reminders` is unique on
+	// (channel_id, symbol) and `channelId` is fixed here, so `symbol` identifies the
+	// reminder.
+	const sentKeysBySymbol = new Map<string, Set<string>>();
 	for (const section of sections) {
 		for (const staple of section.staples) {
-			// snowflakes shouldn't contain `_`, so this composite id shouldn't collide
-			const mapKey = `${staple.reminder.symbol}_${staple.reminder.channel_id}`;
-			const entry = sentKeysByReminder.get(mapKey) ?? {
-				channelId: staple.reminder.channel_id,
-				symbol: staple.reminder.symbol,
-				keys: new Set<string>(),
-			};
+			const keys = sentKeysBySymbol.get(staple.reminder.symbol) ?? new Set<string>();
 			for (const instance of staple.instances) {
-				entry.keys.add(instance.key);
+				keys.add(instance.key);
 			}
-			sentKeysByReminder.set(mapKey, entry);
+			sentKeysBySymbol.set(staple.reminder.symbol, keys);
 		}
 	}
 
 	await Promise.all(
-		[...sentKeysByReminder.values()].map((entry) => reminderStore.markSent(entry.channelId, entry.symbol, [...entry.keys])),
+		[...sentKeysBySymbol].map(([symbol, keys]) => reminderStore.markSent(channelId, symbol, [...keys])),
 	);
 }

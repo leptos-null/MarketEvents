@@ -72,6 +72,8 @@ export class FinnhubClient {
 		const events = await this.earningsFor(symbol, startOfDay, futureDate);
 
 		return events
+			// defensive: Finnhub's `from` is date-granular, so this only guards against
+			// the API returning out-of-range events.
 			.filter((event) => event.date.getTime() >= startOfDay.getTime())
 			.sort((lhs, rhs) => lhs.date.getTime() - rhs.date.getTime())
 			.at(0);
