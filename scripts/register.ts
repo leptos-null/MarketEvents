@@ -8,6 +8,8 @@
  */
 import { registerCommands } from '../src/discord';
 
+// Discord application command type
+const CHAT_INPUT = 1;
 // Discord application command option types
 const SUB_COMMAND = 1;
 const STRING = 3;
@@ -16,12 +18,12 @@ const commands = [
 	{
 		name: 'ping',
 		description: 'Check that bot is responsive',
-		type: 1, // CHAT_INPUT
+		type: CHAT_INPUT,
 	},
 	{
 		name: 'earnings',
 		description: 'Company earnings events',
-		type: 1, // CHAT_INPUT
+		type: CHAT_INPUT,
 		options: [
 			{
 				type: SUB_COMMAND,

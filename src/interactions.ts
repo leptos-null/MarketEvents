@@ -1,4 +1,4 @@
-import { InteractionResponseType } from 'discord-interactions';
+import { InteractionResponseFlags, InteractionResponseType } from 'discord-interactions';
 import { formatLongDateNewYork } from './dates';
 import {
 	EMBED_COLOR,
@@ -22,7 +22,7 @@ export function handleInteraction(interaction: Interaction, env: Env, ctx: Execu
 	if (!data) {
 		return interactionResponse({
 			type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-			data: { content: 'Missing interaction data', flags: 64 },
+			data: { content: 'Missing interaction data', flags: InteractionResponseFlags.EPHEMERAL },
 		});
 	}
 
@@ -42,7 +42,7 @@ export function handleInteraction(interaction: Interaction, env: Env, ctx: Execu
 		default:
 			return interactionResponse({
 				type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-				data: { content: 'Unknown command', flags: 64 },
+				data: { content: 'Unknown command', flags: InteractionResponseFlags.EPHEMERAL },
 			});
 	}
 }

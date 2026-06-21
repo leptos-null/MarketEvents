@@ -36,7 +36,12 @@ export default {
 			return new Response('Invalid request signature', { status: 401 });
 		}
 
-		const interaction = JSON.parse(body) as Interaction;
+		let interaction: Interaction;
+		try {
+			interaction = JSON.parse(body) as Interaction;
+		} catch {
+			return new Response('Invalid request body', { status: 400 });
+		}
 
 		if (interaction.type === InteractionType.PING) {
 			return Response.json({ type: InteractionResponseType.PONG });
