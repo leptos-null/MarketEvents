@@ -5,7 +5,6 @@
 # Secrets
 DISCORD_BOT_TOKEN=
 FINNHUB_API_KEY=
-MONGO_DB_URI=
 
 # Discord application config (non-secret; also mirrored in wrangler.jsonc vars)
 DISCORD_PUBLIC_KEY=

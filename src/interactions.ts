@@ -9,7 +9,7 @@ import {
 } from './discord';
 import { FinnhubClient, isCheckedMarketHour } from './finnhub';
 import type { Env } from './env';
-import { type ReminderElement, ReminderStore, reminderId } from './reminderStore';
+import { type ReminderElement, ReminderStore } from './reminderStore';
 
 function interactionResponse(body: unknown): Response {
 	return Response.json(body);
@@ -108,7 +108,6 @@ async function handleEarnings(interaction: Interaction, data: InteractionData, e
 		}
 
 		const reminder: ReminderElement = {
-			_id: reminderId(upperSymbol, channelId),
 			channel_id: channelId,
 			symbol: upperSymbol,
 			earnings_date: earnings.date,
@@ -117,12 +116,8 @@ async function handleEarnings(interaction: Interaction, data: InteractionData, e
 			sent_keys: [],
 		};
 
-		const reminderStore = new ReminderStore(env.MONGO_DB_URI);
-		try {
-			await reminderStore.add(reminder);
-		} finally {
-			await reminderStore.close();
-		}
+		const reminderStore = new ReminderStore(env.DB);
+		await reminderStore.add(reminder);
 
 		message += '.\n';
 		message += "I'll remind you before the report";

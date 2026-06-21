@@ -24,7 +24,16 @@
 	"vars": {
 		"DISCORD_APPLICATION_ID": "",
 		"DISCORD_PUBLIC_KEY": ""
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "marketevents",
+			// Populate from `wrangler d1 create marketevents`.
+			"database_id": "",
+			"migrations_dir": "migrations"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

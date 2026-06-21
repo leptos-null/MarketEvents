@@ -29,13 +29,9 @@ interface StapledReminder {
 }
 
 export async function runScheduled(env: Env): Promise<void> {
-	const reminderStore = new ReminderStore(env.MONGO_DB_URI);
-	try {
-		await reminderStore.prune();
-		await sendIfNeeded(reminderStore, env, new Date());
-	} finally {
-		await reminderStore.close();
-	}
+	const reminderStore = new ReminderStore(env.DB);
+	await reminderStore.prune();
+	await sendIfNeeded(reminderStore, env, new Date());
 }
 
 function reminderInstances(reminder: ReminderElement): ReminderInstance[] {
@@ -74,7 +70,7 @@ async function sendIfNeeded(reminderStore: ReminderStore, env: Env, now: Date): 
 	const maxDate = now.getTime() + 100 * 1000;
 
 	const collected: StapledReminder[] = [];
-	for await (const reminder of await reminderStore.findInRange(startOfDay, intervalEnd)) {
+	for (const reminder of await reminderStore.findInRange(startOfDay, intervalEnd)) {
 		const sentKeys = new Set(reminder.sent_keys ?? []);
 		const instances = reminderInstances(reminder).filter(
 			(instance) => !sentKeys.has(instance.key) && instance.date.getTime() <= maxDate,
@@ -163,16 +159,24 @@ async function sendMessage(
 	});
 
 	// record which instance keys we just sent, per reminder
-	const sentKeysByReminder = new Map<string, Set<string>>();
+	const sentKeysByReminder = new Map<string, { channelId: string; symbol: string; keys: Set<string> }>();
 	for (const section of sections) {
 		for (const staple of section.staples) {
-			const keys = sentKeysByReminder.get(staple.reminder._id) ?? new Set<string>();
+			// snowflakes shouldn't contain `_`, so this composite id shouldn't collide
+			const mapKey = `${staple.reminder.symbol}_${staple.reminder.channel_id}`;
+			const entry = sentKeysByReminder.get(mapKey) ?? {
+				channelId: staple.reminder.channel_id,
+				symbol: staple.reminder.symbol,
+				keys: new Set<string>(),
+			};
 			for (const instance of staple.instances) {
-				keys.add(instance.key);
+				entry.keys.add(instance.key);
 			}
-			sentKeysByReminder.set(staple.reminder._id, keys);
+			sentKeysByReminder.set(mapKey, entry);
 		}
 	}
 
-	await Promise.all([...sentKeysByReminder].map(([id, keys]) => reminderStore.markSent(id, [...keys])));
+	await Promise.all(
+		[...sentKeysByReminder.values()].map((entry) => reminderStore.markSent(entry.channelId, entry.symbol, [...entry.keys])),
+	);
 }
