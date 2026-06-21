@@ -6,7 +6,7 @@
  * Set `DISCORD_DEV_GUILD_ID` to register to a single guild (changes apply almost
  * immediately); leave it unset to register globally (can take up to an hour).
  */
-import { registerCommands } from './discord';
+import { registerCommands } from '../src/discord';
 
 // Discord application command option types
 const SUB_COMMAND = 1;

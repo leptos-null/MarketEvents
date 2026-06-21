@@ -24,7 +24,7 @@ A single Worker (`src/index.ts`) exposes two handlers:
 - **`fetch`** — Discord HTTP interactions. Verifies the Ed25519 signature (`discord-interactions` `verifyKey`), answers `PING` with `PONG`, then dispatches to `handleInteraction` (`src/interactions.ts`). `/ping` replies immediately; `/earnings reminder <symbol>` returns a **deferred** (type 5) response and finishes the work in `ctx.waitUntil` — Finnhub lookup, Mongo write, then edits the original response via the follow-up webhook.
 - **`scheduled`** — cron handler. `runScheduled` (`src/reminderScheduler.ts`) prunes past reminders and sends any due ones. It is **awaited** (not `waitUntil`) so the invocation stays alive until the work completes.
 
-Module roles: `finnhub.ts` (earnings calendar client + `CheckedMarketHour` bmo/dmh/amc and its ordering), `reminderStore.ts` (MongoDB Atlas access), `dates.ts` (New York time math + user-facing formatting), `discord.ts` (REST v10 helpers + interaction types), `register.ts` (standalone command registration), `env.ts` (`Env` shape).
+Module roles: `finnhub.ts` (earnings calendar client + `CheckedMarketHour` bmo/dmh/amc and its ordering), `reminderStore.ts` (MongoDB Atlas access), `dates.ts` (New York time math + user-facing formatting), `discord.ts` (REST v10 helpers + interaction types), `env.ts` (`Env` shape). `scripts/register.ts` is a standalone build-time CLI (run via `bun run register`), not part of the Worker bundle.
 
 This is a port of a prior Swift/DiscordBM Gateway bot; the Mongo document schema (single `reminders` collection, snake_case field names, BSON `Date`s) is preserved from that version for data compatibility.
 

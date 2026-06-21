@@ -6,7 +6,7 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev --test-scheduled",
     "start": "wrangler dev --test-scheduled",
-    "register": "bun --env-file=.dev.vars src/register.ts",
+    "register": "bun --env-file=.dev.vars scripts/register.ts",
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {
